@@ -35,6 +35,7 @@ public class AggregatingGraphFactory implements GraphFactory {
   private final GraphBuilder<DependencyNode> graphBuilder;
   private final boolean includeParentProjects;
   private final boolean reduceEdges;
+  private final boolean detectCycles;
 
   public AggregatingGraphFactory(
       MavenGraphAdapter mavenGraphAdapter,
@@ -42,14 +43,24 @@ public class AggregatingGraphFactory implements GraphFactory {
       ArtifactFilter globalFilter,
       GraphBuilder<DependencyNode> graphBuilder,
       boolean includeParentProjects,
-      boolean reduceEdges) {
+      boolean reduceEdges, boolean detectCycles) {
     this.mavenGraphAdapter = mavenGraphAdapter;
     this.subProjectSupplier = subProjectSupplier;
     this.globalFilter = globalFilter;
     this.graphBuilder = graphBuilder;
     this.includeParentProjects = includeParentProjects;
     this.reduceEdges = reduceEdges;
+    this.detectCycles = detectCycles;
   }
+    public AggregatingGraphFactory(
+            MavenGraphAdapter mavenGraphAdapter,
+            Supplier<Collection<MavenProject>> subProjectSupplier,
+            ArtifactFilter globalFilter,
+            GraphBuilder<DependencyNode> graphBuilder,
+            boolean includeParentProjects,
+            boolean reduceEdges) {
+      this(mavenGraphAdapter,subProjectSupplier,globalFilter,graphBuilder,includeParentProjects,reduceEdges,false);
+    }
 
   @Override
   public String createGraph(MavenProject parent) {
@@ -77,6 +88,9 @@ public class AggregatingGraphFactory implements GraphFactory {
       this.graphBuilder.reduceEdges();
     }
 
+    if(this.detectCycles){
+        this.graphBuilder.detectCycles();
+    }
     return this.graphBuilder.toString();
   }
 
